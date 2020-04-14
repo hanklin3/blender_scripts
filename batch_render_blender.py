@@ -14,6 +14,7 @@ max_objects = args.max_objects
 objects_dir = args.path
 
 
+
 if system() == 'Windows':
     blender_path = 'C:\Program Files\Blender Foundation'
     blender_exec = os.path.join(blender_path, 'blender', 'blender.exe')

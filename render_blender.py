@@ -217,6 +217,7 @@ for i in range(0, args.views):
 	normal_file_output.file_slots[0].path = file_path + "normal"
 	diffuse_file_output.file_slots[0].path = file_path + "diffuse"
 	specular_file_output.file_slots[0].path = file_path + "specular"
+	
 
 	for jj in range(num_of_lights):
 		x, y, z = gen_samples_on_shpere_surface()
