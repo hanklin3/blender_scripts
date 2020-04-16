@@ -17,7 +17,7 @@ logging.basicConfig(
 
 parser = argparse.ArgumentParser(description='Execute render script on multiple obj files')
 parser.add_argument('-path', type=str, help='Path to the directory which holds object files (in their directories')
-parser.add_argument('--views', type=int, default=5, help='number of views to be rendered for each object')
+parser.add_argument('--views', type=int, default=50, help='number of views to be rendered for each object')
 parser.add_argument('-output_path', type=str, default="/home/toky/asaf/rendered_data/", help='Path to the directory which renders will be written in')
 parser.add_argument('-max_objects', type=int, default=-1, help='maximum number of objects to be rendered')
 parser.add_argument('-render_script', type=str, default="render_blender.py", help='Rendering script')
@@ -65,6 +65,9 @@ for idx, obj_file in enumerate(object_files):
         quit("Error during run: {}".format(error))
     except subprocess.TimeoutExpired:
         logging.error("The object {} timed out and was stopped".format(obj_file))
+    except KeyboardInterrupt as e:
+        logging.exception("Run killed by user")
+        
 
     if idx == max_objects:
         break

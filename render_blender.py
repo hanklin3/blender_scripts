@@ -15,7 +15,7 @@ import bpy
 
 parser = argparse.ArgumentParser(description='Render object and by-products for use in photometric stereo')
 parser.add_argument('--views', type=int, default=5, help='number of views to be rendered')
-parser.add_argument('-num_of_lights', type=int, default=2, help='number of light angles to be rendered')
+parser.add_argument('-num_of_lights', type=int, default=1, help='number of light angles to be rendered')
 parser.add_argument('-obj', type=str, help='Path to the obj file to be rendered.')
 parser.add_argument('-output_folder', type=str, default='/tmp', help='The output path')
 parser.add_argument('--scale', type=float, default=1, help='Scaling factor applied to model. Depends on size of mesh.')
@@ -153,7 +153,6 @@ def setup_nodes():
 
 	bias_normal = tree.nodes.new(type="CompositorNodeMixRGB")
 	bias_normal.blend_type = 'ADD'
-	# bias_normal.use_alpha = True
 	bias_normal.inputs[2].default_value = (0.5, 0.5, 0.5, 0)
 	links.new(scale_normal.outputs[0], bias_normal.inputs[1])
 
@@ -210,8 +209,9 @@ def main_flow():
 	light_directions = {}  # saved and will be written to file
 
 	for i in range(0, args.views):
+		
 		print("Rotation {}, {}".format((stepsize * i), radians(stepsize * i)))
-		file_path  = os.path.join(args.filepath, "obj_rotation" + str(i), "")
+		file_path  = os.path.join(args.filepath, "obj_rotat" + str(i), "")
 
 		depth_file_output.file_slots[0].path = file_path + "depth"
 		normal_file_output.file_slots[0].path = file_path + "normal"
@@ -242,10 +242,11 @@ def main_flow():
 			else:
 				objct = obj
 
-		# objct.rotation_euler[2] += radians(stepsize)
-		objct.rotation_euler[0] += radians(stepsize / 2)  # rotate object 
+		# rotate object around x and z axis (this is just some arbitrary choice to create different views...)
+		objct.rotation_euler[2] += radians(stepsize / 2)
+		objct.rotation_euler[0] += radians(stepsize / 2)
 
-# return exit code different than 0
+# return exit code different than 0 if some exception is thrown
 try: 
 	main_flow()
 except:
