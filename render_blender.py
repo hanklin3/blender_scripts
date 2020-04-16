@@ -14,8 +14,8 @@ import bpy
 
 
 parser = argparse.ArgumentParser(description='Render object and by-products for use in photometric stereo')
-parser.add_argument('--views', type=int, default=1, help='number of views to be rendered')
-parser.add_argument('-num_of_lights', type=int, default=1, help='number of light angles to be rendered')
+parser.add_argument('--views', type=int, default=5, help='number of views to be rendered')
+parser.add_argument('-num_of_lights', type=int, default=2, help='number of light angles to be rendered')
 parser.add_argument('-obj', type=str, help='Path to the obj file to be rendered.')
 parser.add_argument('-output_folder', type=str, default='/tmp', help='The output path')
 parser.add_argument('--scale', type=float, default=1, help='Scaling factor applied to model. Depends on size of mesh.')
