@@ -2,8 +2,9 @@
 # Running the script will iterate a directory with .obj files, for each object will produce V views, for each view, L lights angles
 
 # Example:
-# blender --background --python <script>
-#
+# blender --background --python <script> -- -arg1 <arg1>
+# blender --background --python render_blender.py -- -obj data/monkey.obj -output_folder ./
+# Update code with blender 3.3.1
 
 from math import radians
 import argparse
@@ -29,6 +30,7 @@ argv = sys.argv
 argv = argv[argv.index("--") + 1:]  # parse only string after '--'
 args = parser.parse_args(argv)
 
+print('args: ', args)
 
 # generate a point on a sphere with radius 1, not in front of the cam
 def gen_samples_on_shpere_surface():
@@ -66,7 +68,10 @@ def load_object(obj_filename):
 		bpy.context.object.modifiers["EdgeSplit"].split_angle = 0.523
 		bpy.context.object.modifiers["EdgeSplit"].use_edge_angle = True
 		bpy.context.object.modifiers["EdgeSplit"].use_edge_sharp = False
-		bpy.ops.object.modifier_apply(apply_as='DATA', modifier="EdgeSplit")
+		if bpy.app.version >= (2, 91, 0):
+			bpy.ops.object.modifier_apply(modifier="EdgeSplit")
+		else:
+			bpy.ops.object.modifier_apply(apply_as='DATA', modifier="EdgeSplit")
 
 		# bpy.ops.object.modifier_add(type='SUBSURF')
 		# bpy.context.object.modifiers["Subdivision"].levels = 3
@@ -96,9 +101,17 @@ def setup_nodes():
 	preferences = bpy.context.preferences
 	cycles_preferences = preferences.addons['cycles'].preferences
 	cycles_preferences.compute_device_type = 'CUDA'
-	cuda_devices, opencl_devices = cycles_preferences.get_devices()
 
-	if cuda_devices == []:
+	if cycles_preferences.get_devices() is not None:
+		cuda_devices, opencl_devices = cycles_preferences.get_devices()
+	else:
+		# blender 3.3
+		cycles_preferences.refresh_devices()
+		cuda_devices = cycles_preferences.devices
+		opencl_devices = cycles_preferences.devices
+
+	if not cuda_devices or cuda_devices == []:
+		print(cuda_devices)
 		raise RuntimeError("NO GPUs found")
 
 	for device in cuda_devices:
@@ -114,14 +127,13 @@ def setup_nodes():
 	render.image_settings.color_mode = "RGB"
 
 	render_layer = bpy.types.RenderLayer
-	bpy.context.scene.view_layers["View Layer"].use_pass_normal = True
-	# bpy.context.scene.view_layers["View Layer"].use_pass_diffuse_color = True
-	# bpy.context.scene.view_layers["View Layer"].use_pass_glossy_color = True
-	# bpy.context.scene.view_layers["View Layer"].use_pass_diffuse_direct = True
-	bpy.context.scene.view_layers["View Layer"].use_pass_glossy_direct = True
-	# bpy.context.scene.view_layers["View Layer"].use_pass_diffuse_indirect = True
-	# bpy.context.scene.view_layers["View Layer"].use_pass_glossy_indirect = True
-
+	bpy.context.scene.view_layers["ViewLayer"].use_pass_normal = True
+	# bpy.context.scene.view_layers["ViewLayer"].use_pass_diffuse_color = True
+	# bpy.context.scene.view_layers["ViewLayer"].use_pass_glossy_color = True
+	# bpy.context.scene.view_layers["ViewLayer"].use_pass_diffuse_direct = True
+	bpy.context.scene.view_layers["ViewLayer"].use_pass_glossy_direct = True
+	# bpy.context.scene.view_layers["ViewLayer"].use_pass_diffuse_indirect = True
+	# bpy.context.scene.view_layers["ViewLayer"].use_pass_glossy_indirect = True
 
 	# color space of tangent normals
 	bpy.context.scene.display_settings.display_device = 'None'
